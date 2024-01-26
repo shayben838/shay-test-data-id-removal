@@ -1,7 +1,7 @@
 name: Data LG ID Removal Check
 
 on:
-  push:
+  pull_request:
     branches:
       - main
       - my-custom-branch-with-data-lg-id
