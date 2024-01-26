@@ -7,7 +7,7 @@ on:
       - "**"
 
 jobs:
-  check_data_lg_id_removal:
+  build:
     runs-on: ubuntu-latest
 
     steps:
