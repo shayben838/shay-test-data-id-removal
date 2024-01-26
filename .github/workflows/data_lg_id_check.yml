@@ -14,6 +14,9 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v2
 
+      - name: Fetch branches
+        run: git fetch origin main my-custom-branch-with-data-lg-id
+
       - name: Check for removed data-lg-id
         id: check_removed_data_lg_id
         run: |
