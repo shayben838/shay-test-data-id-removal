@@ -1,0 +1,45 @@
+name: Data LG ID Removal Check
+
+on:
+  pull_request:
+    types: [opened, synchronize]
+    branches:
+      - "**"
+
+jobs:
+  check_data_lg_id_removal:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Check for removed data-lg-id
+        id: check_removed_data_lg_id
+        run: |
+          echo "base.ref: ${{ github.event.pull_request.base.ref }}"
+          echo "head.ref: ${{ github.event.pull_request.head.ref }}"
+          git diff --name-only ${{ github.event.pull_request.base.ref }}...${{ github.event.pull_request.head.ref }} | while read -r file; do
+            echo "Checking file: $file"
+            git diff ${{ github.event.pull_request.base.ref }}...${{ github.event.pull_request.head.ref }} -- "$file" | grep -e '^-.*data-lg-id'
+          done
+
+      - name: Check results and notify
+        if: steps.check_removed_data_lg_id.outputs.stdout != ''
+        run: |
+          echo "The following files have removed data-lg-id instances:"
+          echo "${{ steps.check_removed_data_lg_id.outputs.stdout }}"
+          # Add your alerting/notification logic here, e.g., create a GitHub issue or comment
+
+# TODO:
+# Change the base branch so as not to be hard coded.
+
+# # WORKS AS EXPECTED
+# common_ancestor=$(git merge-base staging HEAD)
+# # Get the list of files modified between the common ancestor commit and HEAD
+# git diff --name-only $common_ancestor..HEAD | while read -r file; do
+#     # Print the filename for reference
+#     echo "Checking file: $file"
+#     # Perform git diff on each individual file
+#     git diff $common_ancestor..HEAD -- "$file" | grep -e '^-.*data-lg-id'
+# done
