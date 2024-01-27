@@ -21,11 +21,11 @@ jobs:
           echo "base.ref: origin/${{ github.event.pull_request.base.ref }}"
           echo "head.ref: origin/${{ github.event.pull_request.head.ref }}"
           git diff --name-only origin/${{ github.event.pull_request.base.ref }}..origin/${{ github.event.pull_request.head.ref }} | while read -r file; do
-            echo "Checking file: $file"
+            echo "11 Checking file: $file"
             git diff origin/${{ github.event.pull_request.base.ref }}..origin/${{ github.event.pull_request.head.ref }}
-            echo "git diff ... works!!"
+            echo "22 git diff ... works!!"
             git diff origin/${{ github.event.pull_request.base.ref }}..origin/${{ github.event.pull_request.head.ref }} -- "$file"
-            echo "git diff -- "$file" works!!"
+            echo "33 git diff -- "$file" works!!"
             git diff origin/${{ github.event.pull_request.base.ref }}..origin/${{ github.event.pull_request.head.ref }} -- "$file" | grep -e '^-.*data-lg-id'
           done
 
