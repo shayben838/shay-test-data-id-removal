@@ -20,9 +20,9 @@ jobs:
       - name: Check for removed data-lg-id
         id: check_removed_data_lg_id
         run: |
-          echo "base.ref: ${{ github.event.pull_request.base.ref }}"
+          echo "base.ref: origin/${{ github.event.pull_request.base.ref }}"
           echo "head.ref: ${{ github.event.pull_request.head.ref }}"
-          git diff --name-only ${{ github.event.pull_request.base.ref }}..${{ github.event.pull_request.head.ref }} | while read -r file; do
+          git diff --name-only "origin/${{ github.event.pull_request.base.ref }}"..${{ github.event.pull_request.head.ref }} | while read -r file; do
             echo "Checking file: $file"
             git diff ${{ github.event.pull_request.base.ref }}...${{ github.event.pull_request.head.ref }} -- "$file" | grep -e '^-.*data-lg-id'
           done
