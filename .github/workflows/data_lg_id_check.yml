@@ -14,7 +14,7 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v2
         with:
-          fetch-depth: 2
+          fetch-depth: 0
       - name: Check for removed data-lg-id
         id: check_removed_data_lg_id
         run: |
