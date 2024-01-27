@@ -1,26 +1,32 @@
 name: Data LG ID Removal Check
 
 on:
-  push:
+  pull_request:
     branches:
       - main
+      - my-custom-branch-with-data-lg-id
 
 jobs:
-  build:
+  check_data_lg_id_removal:
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
-
+        with:
+          fetch-depth: 0
       - name: Check for removed data-lg-id
         id: check_removed_data_lg_id
         run: |
-          echo "base.ref: ${{ github.event.pull_request.base.ref }}"
-          echo "head.ref: ${{ github.event.pull_request.head.ref }}"
-          git diff --name-only ${{ github.event.pull_request.base.ref }}...${{ github.event.pull_request.head.ref }} | while read -r file; do
+          echo "base.ref: origin/${{ github.event.pull_request.base.ref }}"
+          echo "head.ref: origin/${{ github.event.pull_request.head.ref }}"
+          git diff --name-only origin/${{ github.event.pull_request.base.ref }}..origin/${{ github.event.pull_request.head.ref }} | while read -r file; do
             echo "Checking file: $file"
-            git diff ${{ github.event.pull_request.base.ref }}...${{ github.event.pull_request.head.ref }} -- "$file" | grep -e '^-.*data-lg-id'
+            git diff origin/${{ github.event.pull_request.base.ref }}..origin/${{ github.event.pull_request.head.ref }}
+            echo "git diff ... works!!"
+            git diff origin/${{ github.event.pull_request.base.ref }}..origin/${{ github.event.pull_request.head.ref }} -- "$file"
+            echo "git diff -- "$file" works!!"
+            git diff origin/${{ github.event.pull_request.base.ref }}..origin/${{ github.event.pull_request.head.ref }} -- "$file" | grep -e '^-.*data-lg-id'
           done
 
       - name: Check results and notify
@@ -28,7 +34,7 @@ jobs:
         run: |
           echo "The following files have removed data-lg-id instances:"
           echo "${{ steps.check_removed_data_lg_id.outputs.stdout }}"
-          # Add your alerting/notification logic here, e.g., create a GitHub issue or comment
+          # Add your alerting/notification logic here, e.g., create a GitHub issue or
 
 # TODO:
 # Change the base branch so as not to be hard coded.
