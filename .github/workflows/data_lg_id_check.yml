@@ -32,7 +32,6 @@ jobs:
           done
 
       - name: Check results and notify
-        if: steps.check_removed_data_lg_id.outputs.stdout != ''
         run: |
           echo "The following files have removed data-lg-id instances:"
           echo "${{ steps.check_removed_data_lg_id.outputs.stdout }}"
