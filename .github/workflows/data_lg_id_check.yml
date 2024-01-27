@@ -36,7 +36,7 @@ jobs:
       - name: Check results and notify
         run: |
           echo "The following files have removed data-lg-id instances:"
-          echo -e "${{ steps.check_removed_data_lg_id.outputs.removed_files }}"
+          echo "${{ steps.check_removed_data_lg_id.outputs.removed_files }}"
           # Add your alerting/notification logic here, e.g., create a GitHub issue or
 
 # TODO:
