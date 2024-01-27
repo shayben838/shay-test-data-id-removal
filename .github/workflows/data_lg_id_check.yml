@@ -7,27 +7,20 @@ on:
       - my-custom-branch-with-data-lg-id
 
 jobs:
-  build:
+  check_data_lg_id_removal:
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
-
-      - name: Fetch main
-        run: git fetch origin main:refs/remotes/origin/main
-
-      - name: Fetch current
-        run: git fetch origin my-custom-branch-with-data-lg-id:refs/remotes/origin/my-custom-branch-with-data-lg-id
-
+        with:
+          fetch-depth: 2
       - name: Check for removed data-lg-id
         id: check_removed_data_lg_id
         run: |
           echo "base.ref: ${{ github.event.pull_request.base.ref }}"
           echo "head.ref: ${{ github.event.pull_request.head.ref }}"
-          echo "before: ${{ github.event.event.before }}"
-          echo "sha: ${{ github.sha }}"
-          git diff --name-only ${{ github.event.before }}..${{ github.sha }} | while read -r file; do
+          git diff --name-only ${{ github.event.pull_request.base.ref }}...${{ github.event.pull_request.head.ref }} | while read -r file; do
             echo "Checking file: $file"
             git diff ${{ github.event.pull_request.base.ref }}...${{ github.event.pull_request.head.ref }} -- "$file" | grep -e '^-.*data-lg-id'
           done
@@ -37,7 +30,7 @@ jobs:
         run: |
           echo "The following files have removed data-lg-id instances:"
           echo "${{ steps.check_removed_data_lg_id.outputs.stdout }}"
-          # Add your alerting/notification logic here, e.g., create a GitHub issue or comment
+          # Add your alerting/notification logic here, e.g., create a GitHub issue or
 
 # TODO:
 # Change the base branch so as not to be hard coded.
