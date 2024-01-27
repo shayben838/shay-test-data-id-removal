@@ -27,8 +27,8 @@ jobs:
             # git diff origin/${{ github.event.pull_request.base.ref }}..origin/${{ github.event.pull_request.head.ref }} -- "$file"
             echo "33 git diff -- "$file" works!!"
             
-            echo git diff origin/${{ github.event.pull_request.base.ref }}..origin/${{ github.event.pull_request.head.ref }} -- "$file" | grep -e '^-.*data-lg-id'
-            git diff origin/${{ github.event.pull_request.base.ref }}..origin/${{ github.event.pull_request.head.ref }} -- "$file" | grep -e '^-.*data-lg-id'
+            echo git diff "origin/${{ github.event.pull_request.base.ref }}".."origin/${{ github.event.pull_request.head.ref }}" -- "$file" | grep -e '^-.*data-lg-id'
+            #git diff origin/${{ github.event.pull_request.base.ref }}..origin/${{ github.event.pull_request.head.ref }} -- "$file" | grep -e '^-.*data-lg-id'
           done
 
       - name: Check results and notify
@@ -50,3 +50,4 @@ jobs:
 #     # Perform git diff on each individual file
 #     git diff $common_ancestor..HEAD -- "$file" | grep -e '^-.*data-lg-id'
 # done
+git diff main..my-custom-branch-with-data-lg-id -- README.md | grep -e '^-.*data-lg-id'
