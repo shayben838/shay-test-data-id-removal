@@ -15,26 +15,28 @@ jobs:
         uses: actions/checkout@v2
         with:
           fetch-depth: 0
+
       - name: Check for removed data-lg-id
         id: check_removed_data_lg_id
         run: |
           echo "base.ref: origin/${{ github.event.pull_request.base.ref }}"
           echo "head.ref: origin/${{ github.event.pull_request.head.ref }}"
+          removed_files=""
           git diff --name-only origin/${{ github.event.pull_request.base.ref }}..origin/${{ github.event.pull_request.head.ref }} | while read -r file; do
             echo "Checking file: $file"
             if git diff origin/${{ github.event.pull_request.base.ref }}..origin/${{ github.event.pull_request.head.ref }} -- "$file" | grep -q 'data-lg-id'; then
               echo "File $file has removed data-lg-id instances"
+              removed_files="$removed_files\n$file"
             else
               echo "File $file has no removed data-lg-id instances"
             fi
           done
+          echo "::set-output name=removed_files::$removed_files"
 
       - name: Check results and notify
         run: |
           echo "The following files have removed data-lg-id instances:"
-          echo "${{ steps.check_removed_data_lg_id.outputs }}"
-          echo "----"
-          echo "${{ steps.check_removed_data_lg_id.outputs.stdout }}"
+          echo -e "${{ steps.check_removed_data_lg_id.outputs.removed_files }}"
           # Add your alerting/notification logic here, e.g., create a GitHub issue or
 
 # TODO:
