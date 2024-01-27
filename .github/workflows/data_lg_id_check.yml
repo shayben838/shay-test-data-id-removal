@@ -25,7 +25,9 @@ jobs:
         run: |
           echo "base.ref: ${{ github.event.pull_request.base.ref }}"
           echo "head.ref: ${{ github.event.pull_request.head.ref }}"
-          git diff --name-only ${{ github.event.pull_request.head.ref }}..${{ github.event.pull_request.base.ref }} | while read -r file; do
+          echo "before: ${{ github.event.event.before }}"
+          echo "sha: ${{ github.sha }}"
+          git diff --name-only ${{ github.event.before }}..${{ github.sha }} | while read -r file; do
             echo "Checking file: $file"
             git diff ${{ github.event.pull_request.base.ref }}...${{ github.event.pull_request.head.ref }} -- "$file" | grep -e '^-.*data-lg-id'
           done
