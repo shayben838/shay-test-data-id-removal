@@ -28,7 +28,7 @@ jobs:
             echo "33 git diff -- "$file" works!!"
             
             echo git diff origin/${{ github.event.pull_request.base.ref }}..origin/${{ github.event.pull_request.head.ref }} -- "$file"
-            git diff origin/${{ github.event.pull_request.base.ref }}..origin/${{ github.event.pull_request.head.ref }} -- "$file"
+            git diff origin/${{ github.event.pull_request.base.ref }}..origin/${{ github.event.pull_request.head.ref }} -- "$file" |  grep 'data-lg-id'
           done
 
       - name: Check results and notify
