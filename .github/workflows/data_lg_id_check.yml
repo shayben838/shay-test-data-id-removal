@@ -29,7 +29,7 @@ jobs:
           removed_files=""
           git diff --name-only origin/${{ github.event.pull_request.base.ref }}..origin/${{ github.event.pull_request.head.ref }} | while read -r file; do
             echo "Checking file: $file"
-            if git diff origin/${{ github.event.pull_request.base.ref }}..origin/${{ github.event.pull_request.head.ref }} -- "$file" | grep -q 'data-lg-id'; then
+            if git diff origin/${{ github.event.pull_request.base.ref }}..origin/${{ github.event.pull_request.head.ref }} -- "$file" | grep -e '^-.*data-lg-id'; then
               echo "File $file has removed data-lg-id instances"
               removed_files="$removed_files\n$file"
 
