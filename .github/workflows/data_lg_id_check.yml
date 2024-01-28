@@ -10,6 +10,10 @@ jobs:
   check_data_lg_id_removal:
     runs-on: ubuntu-latest
 
+    outputs:
+      id: removed_data
+      value: ${{ steps.check_removed_data_lg_id.outputs.removed_files }}
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
@@ -21,33 +25,29 @@ jobs:
         run: |
           echo "base.ref: origin/${{ github.event.pull_request.base.ref }}"
           echo "head.ref: origin/${{ github.event.pull_request.head.ref }}"
+
           removed_files=""
           git diff --name-only origin/${{ github.event.pull_request.base.ref }}..origin/${{ github.event.pull_request.head.ref }} | while read -r file; do
             echo "Checking file: $file"
             if git diff origin/${{ github.event.pull_request.base.ref }}..origin/${{ github.event.pull_request.head.ref }} -- "$file" | grep -q 'data-lg-id'; then
               echo "File $file has removed data-lg-id instances"
               removed_files="$removed_files\n$file"
-            else
-              echo "File $file has no removed data-lg-id instances"
+
+              # Add comment to the pull request for each file with removed data-lg-id
+              echo "Adding comment to pull request"
+              file_name=$(basename "$file")
+              pr_number="${{ github.event.number }}"
+              repo_owner="${{ github.repository_owner }}"
+              repo_name="${{ github.repository }}"
+              comment="Dear maintainer, please pay attention that you edited a data-lg-id attribute in the file $file_name, which is forbidden."
+
+              curl -sSL -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" -X POST -H "Content-Type: application/json" -d '{"body":"'${comment}'"}' "https://api.github.com/repos/${repo_owner}/${repo_name}/issues/${pr_number}/comments"
             fi
           done
+
           echo "::set-output name=removed_files::$removed_files"
 
       - name: Check results and notify
         run: |
           echo "The following files have removed data-lg-id instances:"
-          echo "${{ steps.check_removed_data_lg_id.outputs.removed_files }}"
-          # Add your alerting/notification logic here, e.g., create a GitHub issue or
-
-# TODO:
-# Change the base branch so as not to be hard coded.
-
-# # WORKS AS EXPECTED
-# common_ancestor=$(git merge-base staging HEAD)
-# # Get the list of files modified between the common ancestor commit and HEAD
-# git diff --name-only $common_ancestor..HEAD | while read -r file; do
-#     # Print the filename for reference
-#     echo "Checking file: $file"
-#     # Perform git diff on each individual file
-#     git diff $common_ancestor..HEAD -- "$file" | grep -e '^-.*data-lg-id'
-# done
+          echo -e "${{ needs.check_data_lg_id_removal.outputs.removed_files }}"
