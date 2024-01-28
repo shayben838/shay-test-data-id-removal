@@ -41,7 +41,7 @@ jobs:
               repo_name="${{ github.repository }}"
               comment="Dear maintainer, please pay attention that you edited a data-lg-id attribute in the file $file_name, which is forbidden."
 
-              curl -sSL -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" -X POST -H "Content-Type: application/json" -d '{"body":"'${comment}'"}' "https://api.github.com/repos/${repo_owner}/${repo_name}/issues/${pr_number}/comments"
+              # curl -sSL -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" -X POST -H "Content-Type: application/json" -d '{"body":"'${comment}'"}' "https://api.github.com/repos/${repo_owner}/${repo_name}/issues/${pr_number}/comments"
             fi
           done
 
