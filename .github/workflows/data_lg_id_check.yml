@@ -7,7 +7,7 @@ on:
       - my-custom-branch-with-data-lg-id
 
 jobs:
-  check_data_lg_id_removal:
+  detect-data-lg-id-changes:
     runs-on: ubuntu-latest
 
     steps:
@@ -30,7 +30,7 @@ jobs:
               echo "File $file has removed data-lg-id instances"
               
               # Add a warning annotation to the specific file
-              echo "::warning file=$file,title=[ data-lg-id ] Change Detected:: existing data-lg-ids are to be changed with care, as apart from specs those attributes are also used for external hooks like cypress, tutorials and may be further used for other things, that aren't part of Labguru App's codebase."
+              echo "::warning file=$file,title=[ data-lg-id ] Change Detected!:: existing data-lg-ids are to be changed with care, as apart from specs those attributes are also used for external hooks like cypress, tutorials and may be further used for other things, that aren't part of Labguru App's codebase."
             fi
           done
 
