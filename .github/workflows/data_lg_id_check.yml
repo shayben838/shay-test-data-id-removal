@@ -23,9 +23,10 @@ jobs:
       - name: Set flag for removed data-lg-id
         id: set_flag
         run: |
-          has_removed_data_lg_id="false"  # Initialize as false
           echo "base.ref: origin/${{ github.event.pull_request.base.ref }}"
           echo "head.ref: origin/${{ github.event.pull_request.head.ref }}"
+
+          has_removed_data_lg_id="false"  # Initialize as false
 
           git diff --name-only origin/${{ github.event.pull_request.base.ref }}..origin/${{ github.event.pull_request.head.ref }} | while read -r file; do
             echo "Checking file: $file"
@@ -35,15 +36,19 @@ jobs:
             fi
           done
 
-          echo "::set-output name=has_removed_data_lg_id::$has_removed_data_lg_id"
+          # Save the flag to an environment file
+          echo "HAS_REMOVED_DATA_LG_ID=$has_removed_data_lg_id" > $GITHUB_ENV
 
       - name: Check results and notify
         run: |
           echo "The following files have removed data-lg-id instances:"
           echo -e "${{ needs.check_data_lg_id_removal.outputs.removed_files }}"
+          echo "START"
+          echo "$${{ env.HAS_REMOVED_DATA_LG_ID }}"
+          echo "END"
 
-          # Access the environment variable set in the previous step
-          if [ "${{ needs.check_data_lg_id_removal.outputs.has_removed_data_lg_id }}" == "true" ]; then
+          # Access the environment variable using ${{ env.VARIABLE_NAME }}
+          if [ "${{ env.HAS_REMOVED_DATA_LG_ID }}" == "true" ]; then
             echo "Flag indicates there are removed data-lg-id instances."
             # Add your alerting/notification logic here, e.g., create a GitHub issue or
           else
