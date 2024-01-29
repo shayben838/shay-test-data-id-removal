@@ -21,7 +21,7 @@ jobs:
         run: |
           git diff --name-only origin/${{ github.event.pull_request.base.ref }}..origin/${{ github.event.pull_request.head.ref }} | while read -r file; do
             echo "Checking file: $file"
-            if git diff origin/${{ github.event.pull_request.base.ref }}..origin/${{ github.event.pull_request.head.ref }} -- "$file" | grep -q 'data-lg-id'; then
+            if git diff origin/${{ github.event.pull_request.base.ref }}..origin/${{ github.event.pull_request.head.ref }} -- "$file" | grep -e '^-.*data-lg-id'; then
               echo "File $file has removed data-lg-id instances"
               has_removed_data_lg_id="true"  # Set the flag to true
               echo "::warning file=$file::Warning in $file"
