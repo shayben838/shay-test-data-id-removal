@@ -30,7 +30,7 @@ jobs:
               echo "File $file has removed data-lg-id instances"
               
               # Add a warning annotation to the specific file
-              echo "::warning file=$file,title={'My Title'}:: Lines with removed or changed data-lg-id instances detected"
+              echo "::warning file=$file,title=Lines with removed or changed data-lg-id instances detected"
             fi
           done
 
