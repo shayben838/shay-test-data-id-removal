@@ -17,13 +17,26 @@ jobs:
           fetch-depth: 0
 
       - name: Check and notify
-        id: set_flag
         run: |
-          git diff --name-only origin/${{ github.event.pull_request.base.ref }}..origin/${{ github.event.pull_request.head.ref }} | while read -r file; do
+          # Store the diff range in a variable
+          diff_range="origin/${{ github.event.pull_request.base.ref }}..origin/${{ github.event.pull_request.head.ref }}"
+
+          # Loop through each file changed in the pull request
+          git diff --name-only $diff_range | while read -r file; do
             echo "Checking file: $file"
-            if git diff origin/${{ github.event.pull_request.base.ref }}..origin/${{ github.event.pull_request.head.ref }} -- "$file" | grep -e '^-.*data-lg-id'; then
+            
+            # Check if the file has lines with removed data-lg-id
+            if git diff $diff_range -- "$file" | grep -e '^-.*data-lg-id'; then
               echo "File $file has removed data-lg-id instances"
-              has_removed_data_lg_id="true"  # Set the flag to true
-              echo "::warning file=$file::Warning in $file"
+              
+              # Add a warning annotation to the specific file
+              echo "::warning file=$file::Warning: Lines with removed or changed data-lg-id instances detected"
             fi
           done
+
+# Explanation of the grep command(grep -e '^-.*data-lg-id'):
+#   - '^': Match the beginning of a line
+#   - '-': Match the specific character '-' indicating removed lines
+#   - '.*': Match any characters (zero or more)
+#   - 'data-lg-id': Match the specific string 'data-lg-id'
+# This grep command looks for lines that start with '-' and include 'data-lg-id', indicating removed or changed instances.
