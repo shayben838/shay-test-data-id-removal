@@ -20,37 +20,32 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Check for removed data-lg-id
-        id: check_removed_data_lg_id
+      - name: Set flag for removed data-lg-id
+        id: set_flag
         run: |
+          has_removed_data_lg_id="false"  # Initialize as false
           echo "base.ref: origin/${{ github.event.pull_request.base.ref }}"
           echo "head.ref: origin/${{ github.event.pull_request.head.ref }}"
 
-          removed_files=""
           git diff --name-only origin/${{ github.event.pull_request.base.ref }}..origin/${{ github.event.pull_request.head.ref }} | while read -r file; do
             echo "Checking file: $file"
-            if git diff origin/${{ github.event.pull_request.base.ref }}..origin/${{ github.event.pull_request.head.ref }} -- "$file" | grep -e '^-.*data-lg-id'; then
+            if git diff origin/${{ github.event.pull_request.base.ref }}..origin/${{ github.event.pull_request.head.ref }} -- "$file" | grep -q 'data-lg-id'; then
               echo "File $file has removed data-lg-id instances"
-              removed_files="$removed_files\n$file"
-
-              # Add comment to the pull request for each file with removed data-lg-id
-              echo "Adding comment to pull request"
-              file_name=$(basename "$file")
-              pr_number="${{ github.event.number }}"
-              repo_owner="${{ github.repository_owner }}"
-              repo_name="${{ github.repository }}"
-              comment="Dear maintainer, please pay attention that you edited a data-lg-id attribute in the file $file_name, which is forbidden."
-
-              # curl -sSL -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" -X POST -H "Content-Type: application/json" -d '{"body":"'${comment}'"}' "https://api.github.com/repos/${repo_owner}/${repo_name}/issues/${pr_number}/comments"
+              has_removed_data_lg_id="true"  # Set the flag to true
             fi
           done
 
-          echo "::set-output name=removed_files::$removed_files"
+          echo "::set-output name=has_removed_data_lg_id::$has_removed_data_lg_id"
 
       - name: Check results and notify
         run: |
           echo "The following files have removed data-lg-id instances:"
           echo -e "${{ needs.check_data_lg_id_removal.outputs.removed_files }}"
 
-# TODO:
-# Since the grep logic works as expected the next step is to notify the pr (anotation/ comment) + mark the action as faild?...
+          # Access the environment variable set in the previous step
+          if [ "${{ needs.check_data_lg_id_removal.outputs.has_removed_data_lg_id }}" == "true" ]; then
+            echo "Flag indicates there are removed data-lg-id instances."
+            # Add your alerting/notification logic here, e.g., create a GitHub issue or
+          else
+            echo "No removed data-lg-id instances detected."
+          fi
