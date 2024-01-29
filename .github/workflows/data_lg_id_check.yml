@@ -7,46 +7,39 @@ on:
       - my-custom-branch-with-data-lg-id
 
 jobs:
-  check_data_lg_id_removal:
+  detect-data-lg-id-changes:
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
         with:
-          fetch-depth: 0
-      - name: Check for removed data-lg-id
-        id: check_removed_data_lg_id
+          ref: ${{  github.event.pull_request.base.ref }}
+
+      - name: Check and notify
         run: |
-          echo "base.ref: origin/${{ github.event.pull_request.base.ref }}"
-          echo "head.ref: origin/${{ github.event.pull_request.head.ref }}"
-          git diff --name-only origin/${{ github.event.pull_request.base.ref }}..origin/${{ github.event.pull_request.head.ref }} | while read -r file; do
-            echo "11 Checking file: $file"
-            # git diff origin/${{ github.event.pull_request.base.ref }}..origin/${{ github.event.pull_request.head.ref }}
-            # echo "22 git diff ... works!!"
-            # git diff origin/${{ github.event.pull_request.base.ref }}..origin/${{ github.event.pull_request.head.ref }} -- "$file"
-            echo "33 git diff -- "$file" works!!"
+          echo "base origin/${{ github.event.pull_request.base.ref }}"
+          echo "head origin/${{ github.event.pull_request.head.ref }}"
+
+          # Store the diff range in a variable
+          diff_range="origin/${{ github.event.pull_request.base.ref }}..origin/${{ github.event.pull_request.head.ref }}"
+
+          # Loop through each file changed in the pull request
+          git diff --name-only $diff_range | while read -r file; do
+            echo "Checking file: $file"
             
-            echo git diff origin/${{ github.event.pull_request.base.ref }}..origin/${{ github.event.pull_request.head.ref }} -- "$file" | grep -e '^-.*data-lg-id'
-            git diff origin/${{ github.event.pull_request.base.ref }}..origin/${{ github.event.pull_request.head.ref }} -- "$file" | grep -e '^-.*data-lg-id'
+            # Check if the file has lines with removed data-lg-id
+            if git diff $diff_range -- "$file" | grep -e '^-.*data-lg-id'; then
+              echo "File $file has removed data-lg-id instances"
+              
+              # Add a warning annotation to the specific file
+              echo "::warning file=$file,title=[ data-lg-id ] Change Detected!:: existing data-lg-ids are to be changed with care, as apart from specs those attributes are also used for external hooks like cypress, tutorials and may be further used for other things, that aren't part of Labguru App's codebase."
+            fi
           done
 
-      - name: Check results and notify
-        if: steps.check_removed_data_lg_id.outputs.stdout != ''
-        run: |
-          echo "The following files have removed data-lg-id instances:"
-          echo "${{ steps.check_removed_data_lg_id.outputs.stdout }}"
-          # Add your alerting/notification logic here, e.g., create a GitHub issue or
-
-# TODO:
-# Change the base branch so as not to be hard coded.
-
-# # WORKS AS EXPECTED
-# common_ancestor=$(git merge-base staging HEAD)
-# # Get the list of files modified between the common ancestor commit and HEAD
-# git diff --name-only $common_ancestor..HEAD | while read -r file; do
-#     # Print the filename for reference
-#     echo "Checking file: $file"
-#     # Perform git diff on each individual file
-#     git diff $common_ancestor..HEAD -- "$file" | grep -e '^-.*data-lg-id'
-# done
+# Explanation of the grep command(grep -e '^-.*data-lg-id'):
+#   - '^': Match the beginning of a line
+#   - '-': Match the specific character '-' indicating removed lines
+#   - '.*': Match any characters (zero or more)
+#   - 'data-lg-id': Match the specific string 'data-lg-id'
+# This grep command looks for lines that start with '-' and include 'data-lg-id', indicating removed or changed instances.
