@@ -12,12 +12,15 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v2
+      - uses: actions/checkout@v4
         with:
-          fetch-depth: 0
+          ref: ${{ github.head_ref }}
 
       - name: Check and notify
         run: |
+          echo "base origin/${{ github.event.pull_request.base.ref }}"
+          echo "head origin/${{ github.event.pull_request.head.ref }}"
+
           # Store the diff range in a variable
           diff_range="origin/${{ github.event.pull_request.base.ref }}..origin/${{ github.event.pull_request.head.ref }}"
 
